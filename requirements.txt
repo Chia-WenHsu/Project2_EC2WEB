@@ -1,5 +1,11 @@
-fastapi
-gunicorn
-uvicorn
+fastapi==0.103.1
+uvicorn[standard]==0.23.2
+
 aiobotocore[boto3]==2.5.0
-boto3==1.26.0
+botocore==1.27.96
+boto3==1.24.96
+
+aiofiles==23.1.0
+python-multipart==0.0.6
+
+gunicorn==21.2.0
