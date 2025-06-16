@@ -60,7 +60,7 @@ async def predict(image: UploadFile = File(...)):
     filename_wo_ext = os.path.splitext(image.filename)[0]
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     s3_key = f"{filename_wo_ext}_{timestamp}.jpeg"
-    request_id = s3_key
+    request_id = f"{filename_wo_ext}_{timestamp}"
 
     try:
         file_bytes = await image.read()  # ✅ 這是 async 方式
