@@ -30,10 +30,16 @@ async def wait_for_result_async(request_id: str, timeout_seconds=30) -> str | No
             for message in messages:
                 body = message["Body"]
 
-                if not body.startswith(request_id + ","):
+                # 拆成三段：request_id, 原始檔名, 預測結果
+                parts = body.split(",")
+                if len(parts) != 3:
                     continue
 
-                _, result = body.split(",", 1)
+                msg_request_id, _, result = parts
+
+                # 僅處理符合此 request 的訊息
+                if msg_request_id != request_id:
+                    continue
 
                 await client.delete_message(
                     QueueUrl=RESPONSE_QUEUE_URL,
