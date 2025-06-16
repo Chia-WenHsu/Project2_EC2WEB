@@ -51,7 +51,8 @@ async def predict(image: UploadFile = File(...)):
     request_id = s3_key
 
     try:
-        await upload_img_to_s3(image.file, s3_key)
+        file_bytes = await image.read()  # ✅ 這是 async 方式
+        await upload_img_to_s3(file_bytes, s3_key)
         await send_request_to_q(request_id, s3_key)
 
         result = await wait_for_result_async(request_id)
