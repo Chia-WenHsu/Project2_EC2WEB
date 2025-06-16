@@ -1,0 +1,5 @@
+fastapi
+gunicorn
+uvicorn
+aiobotocore[boto3]==2.5.0
+boto3==1.26.0

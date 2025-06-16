@@ -1,0 +1,26 @@
+import json
+from aiobotocore.session import get_session
+
+INPUT_BUCKET = "nicoproject2input"
+REQUEST_QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/530751794867/project2-request-q"
+
+async def upload_img_to_s3(file, key):
+    """非同步上傳圖片到 S3"""
+    session = get_session()
+    async with session.create_client('s3', region_name='ap-northeast-2') as s3:
+        body = await file.read()
+        await s3.put_object(
+            Bucket=INPUT_BUCKET,
+            Key=key,
+            Body=body
+        )
+
+async def send_request_to_q(request_id: str, s3_key: str):
+    """非同步傳送訊息到 SQS"""
+    session = get_session()
+    async with session.create_client('sqs', region_name='ap-northeast-2') as client:
+        message = json.dumps({"requestId": request_id, "s3Key": s3_key})
+        await client.send_message(
+            QueueUrl=REQUEST_QUEUE_URL,
+            MessageBody=message
+        )
