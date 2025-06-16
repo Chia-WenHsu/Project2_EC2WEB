@@ -33,12 +33,18 @@ async def wait_for_result_async(request_id: str, timeout_seconds=30) -> str | No
                 # 拆成三段：request_id, 原始檔名, 預測結果
                 parts = body.split(",")
                 if len(parts) != 3:
+                    print(f"Skip (invalid format): {body}")
                     continue
+                
+                print(f" request_id: {request_id}")
 
                 msg_request_id, _, result = parts
 
+                print(f" msg_request_id: {msg_request_id}")
+
                 # 僅處理符合此 request 的訊息
                 if msg_request_id != request_id:
+                    print(f" Skip (not match): msg_request_id={msg_request_id}, expected={request_id}")
                     continue
 
                 await client.delete_message(
