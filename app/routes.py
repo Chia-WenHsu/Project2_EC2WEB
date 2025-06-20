@@ -56,7 +56,7 @@ async def wait_for_result_async(request_id: str, timeout_seconds=30) -> str | No
     return None
 
 @router.post("/predict")
-async def predict(image: UploadFile = File(...)):
+async def predict(image: UploadFile = File(..., alias="myfile")):
     filename_wo_ext = os.path.splitext(image.filename)[0]
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     s3_key = f"{filename_wo_ext}_{timestamp}.jpeg"
