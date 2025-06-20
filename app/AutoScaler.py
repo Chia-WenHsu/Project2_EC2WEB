@@ -6,7 +6,7 @@ AMI_ID = "ami-06507774ba3043fd1"
 INSTANCE_TYPE = "t2.micro"
 KEY_NAME = "nico_projectKey"
 SECURITY_GROUP_IDS = ["sg-06130228d6c599dd4"]
-REQUEST_QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/530751794867/project2-response-q"
+REQUEST_QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/530751794867/project2-request-q"
 
 
 ec2 = boto3.client('ec2', region_name=REGION)
