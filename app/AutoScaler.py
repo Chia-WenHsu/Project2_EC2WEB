@@ -1,8 +1,8 @@
 import boto3
 
 REGION = "ap-northeast-2"
-MAX_INSTANCE = 3  
-AMI_ID = "ami-06507774ba3043fd1"
+MAX_INSTANCE =  2 
+AMI_ID = "ami-011dae5f0fc7d1a64"
 INSTANCE_TYPE = "t2.micro"
 KEY_NAME = "nico_projectKey"
 SECURITY_GROUP_IDS = ["sg-06130228d6c599dd4"]
