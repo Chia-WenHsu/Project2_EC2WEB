@@ -43,7 +43,10 @@ def launch_app_instances(count):
             TagSpecifications=[{
                 'ResourceType': 'instance',
                 'Tags': [{'Key': 'Name', 'Value': f'app-instance{i+1}'}]
-            }]
+            }],
+            IamInstanceProfile={  
+                'Name': 'CSE546WebRole'  
+            }
         )
 
 
