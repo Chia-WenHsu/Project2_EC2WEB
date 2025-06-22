@@ -9,6 +9,7 @@ from datetime import datetime
 from aiobotocore.session import get_session
 import time
 import os
+import traceback  
 
 router = APIRouter()
 
@@ -74,4 +75,5 @@ async def predict(image: UploadFile = File(..., alias="myfile")):
         else:
             return PlainTextResponse(f"{s3_key} uploaded!\nClassification result: TIMEOUT")
     except Exception as e:
+        traceback.print_exc()  
         return PlainTextResponse(f"Error during processing: {str(e)}", status_code=500)
