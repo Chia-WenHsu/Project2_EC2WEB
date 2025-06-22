@@ -91,10 +91,10 @@ def scale_app_instances():
         print(f" 建立 {to_add} instances")
         launch_app_instances(to_add)
 
-    elif current_count > desired_count:
-        to_remove = current_count - desired_count
-        print(f" Terminating {to_remove} excess instances")
-        terminate_app_instances(to_remove)
+    # elif current_count > desired_count:
+    #     to_remove = current_count - desired_count
+    #     print(f" Terminating {to_remove} excess instances")
+    #     terminate_app_instances(to_remove)
 
     else:
         print("無須擴展")
