@@ -29,7 +29,7 @@ app.include_router(test_router)
 #             traceback.print_exc()
 #         await asyncio.sleep(5)
 
-@test_router.get("status")
+@test_router.get("/status")
 async def status():
     depth = await get_sqs_q_depth()
     current_instances = await get_current_app_instance()
