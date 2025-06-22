@@ -19,7 +19,7 @@ async def start_autoscaler():
                 scale_app_instances()
             except Exception as e:
                 print(f"[AutoScaler Error] {e}")
-            await asyncio.sleep(10)   
+            await asyncio.sleep(5)   
 
     asyncio.create_task(scaler_loop())  
 
