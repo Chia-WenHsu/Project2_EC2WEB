@@ -46,6 +46,11 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
 
                 if msg_request_id != request_id:
                     print(f"[{request_id}] Not match → skip (do not delete)")
+                    await client.change_message_visibility(
+                        QueueUrl=RESPONSE_QUEUE_URL,
+                        ReceiptHandle=message["ReceiptHandle"],
+                        VisibilityTimeout=0
+                    )
                     continue
 
                 # 匹配成功 → 刪除並回傳結果
