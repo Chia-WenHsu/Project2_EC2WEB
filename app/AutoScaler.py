@@ -1,7 +1,7 @@
 import boto3
 
 REGION = "ap-northeast-2"
-MAX_INSTANCE =  2 
+MAX_INSTANCE =  11 
 AMI_ID = "ami-011dae5f0fc7d1a64"
 INSTANCE_TYPE = "t2.micro"
 KEY_NAME = "nico_projectKey"
@@ -20,6 +20,8 @@ def get_sqs_q_depth():
     )
     return int(response['Attributes']['ApproximateNumberOfMessages'])
 
+
+## 取的現在多少instance
 def get_current_app_instance():
     response = ec2.describe_instances(
         Filters=[
@@ -31,6 +33,7 @@ def get_current_app_instance():
     return instances
 
 
+## 創立instance
 def launch_app_instances(count):
     for i in range(count):
         ec2.run_instances(
@@ -50,6 +53,7 @@ def launch_app_instances(count):
         )
 
 
+## 關掉instanse
 def terminate_app_instances(count_to_terminate):
     response = ec2.describe_instances(
         Filters=[
@@ -70,9 +74,9 @@ def terminate_app_instances(count_to_terminate):
 
     if instance_ids:
         ec2.terminate_instances(InstanceIds=instance_ids)
-        print(f"Terminated instances: {instance_ids}")
+        print(f"關掉裝置中: {instance_ids}")
     else:
-        print("No running instances to terminate.")
+        print("沒有裝置")
 
 def scale_app_instances():
     queue_depth = get_sqs_q_depth()
@@ -84,7 +88,7 @@ def scale_app_instances():
 
     if current_count < desired_count:
         to_add = desired_count - current_count
-        print(f" Launching {to_add} instances")
+        print(f" 建立 {to_add} instances")
         launch_app_instances(to_add)
 
     elif current_count > desired_count:
@@ -93,4 +97,4 @@ def scale_app_instances():
         terminate_app_instances(to_remove)
 
     else:
-        print(" No scaling needed")
+        print("無須擴展")
