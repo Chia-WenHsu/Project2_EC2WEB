@@ -12,6 +12,9 @@ REQUEST_QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/530751794867/proje
 ec2 = boto3.client('ec2', region_name=REGION)
 sqs = boto3.client('sqs', region_name=REGION)
 
+low_queue_counter = 0
+COOLDOWN_CYCLE = 3
+
 def get_sqs_q_depth():
     response = sqs.get_queue_attributes(
         QueueUrl=REQUEST_QUEUE_URL,
@@ -79,6 +82,9 @@ def terminate_app_instances(count_to_terminate):
         print("沒有裝置")
 
 def scale_app_instances():
+
+    global low_queue_counter
+
     queue_depth = get_sqs_q_depth()
     current_instances = get_current_app_instance()
     current_count = len(current_instances)
@@ -90,11 +96,15 @@ def scale_app_instances():
         to_add = desired_count - current_count
         print(f" 建立 {to_add} instances")
         launch_app_instances(to_add)
+        low_queue_counter  = 0
 
-    # elif current_count > desired_count:
-    #     to_remove = current_count - desired_count
-    #     print(f" Terminating {to_remove} excess instances")
-    #     terminate_app_instances(to_remove)
+    elif current_count > desired_count:
+       if low_queue_counter >= COOLDOWN_CYCLE:
+            to_remove = current_count - desired_count
+            print(f" Terminating {to_remove} excess instances")
+            terminate_app_instances(to_remove)
+            low_queue_counter = 0  # 關完之後重設
 
     else:
         print("無須擴展")
+        low_queue_counter = 0
