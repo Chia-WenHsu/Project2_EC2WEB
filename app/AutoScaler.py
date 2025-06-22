@@ -103,14 +103,14 @@ def scale_app_instances():
         launch_app_instances(to_add)
         low_queue_counter = 0  # 有擴張就重設
 
-    elif current_count > desired_count:
-        low_queue_counter += 1  # ✅ 關鍵：累加降載次數
-        print(f" 累積低佇列次數: {low_queue_counter}/{COOLDOWN_CYCLE}")
-        if low_queue_counter >= COOLDOWN_CYCLE:
-            to_remove = current_count - desired_count
-            print(f"🔥 Terminating {to_remove} excess instances")
-            terminate_app_instances(to_remove)
-            low_queue_counter = 0  # 關完再重設
+    # elif current_count > desired_count:
+    #     low_queue_counter += 1  # ✅ 關鍵：累加降載次數
+    #     print(f" 累積低佇列次數: {low_queue_counter}/{COOLDOWN_CYCLE}")
+    #     if low_queue_counter >= COOLDOWN_CYCLE:
+    #         to_remove = current_count - desired_count
+    #         print(f"🔥 Terminating {to_remove} excess instances")
+    #         terminate_app_instances(to_remove)
+    #         low_queue_counter = 0  # 關完再重設
 
     else:
         print(" 無須擴展")
