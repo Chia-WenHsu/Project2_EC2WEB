@@ -27,7 +27,7 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
             print(f"[{request_id}] polling attempt {attempt}")
             response = await client.receive_message(
                 QueueUrl=RESPONSE_QUEUE_URL,
-                MaxNumberOfMessages=10,
+                MaxNumberOfMessages=5,
                 WaitTimeSeconds=1
             )
 
@@ -49,7 +49,7 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
                     await client.change_message_visibility(
                         QueueUrl=RESPONSE_QUEUE_URL,
                         ReceiptHandle=message["ReceiptHandle"],
-                        VisibilityTimeout=0
+                        VisibilityTimeout=2
                     )
                     continue
 
@@ -61,7 +61,7 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
                 print(f"[{request_id}] Matched. Returning result.")
                 return result
 
-            await asyncio.sleep(0.1)  # 防止 CPU 過載
+            await asyncio.sleep(0.2)  # 防止 CPU 過載
 
         print(f"[{request_id}] Timeout after {timeout_seconds}s")
         return None
