@@ -12,28 +12,32 @@ app = FastAPI()
 app.include_router(router)
 app.include_router(test_router)
 
+main_pid = os.getpid()
+
 @app.on_event("startup")
 async def startup_event():
     await asyncio.sleep(5)
     print("System ready. Web API starting...")
 
-    if os.getpid() == int(os.environ.get("MAIN_GUNICORN_PID", "0")):
-        print("Launching AutoScaler (main process only)")
-        asyncio.create_task(start_autoscaler_loop())  # 
-#  自動 scaling 的背景 loop
+    if os.getpid() == main_pid:
+        print(" This is the main process, launching AutoScaler...")
+        asyncio.create_task(start_autoscaler_loop())
+    else:
+        print(" Not main process, skipping AutoScaler.")
+
 async def start_autoscaler_loop():
+    print(" AutoScaler background task started.")
     while True:
         try:
-            await scale_app_instances()  # 
+            await scale_app_instances()
         except Exception as e:
             print(f"[AutoScaler Error] {e}")
-        await asyncio.sleep(5) 
+        await asyncio.sleep(5)
 
-
-@app.get("/status")
-def status():
-    depth = get_sqs_q_depth()
-    current = len(get_current_app_instance())
+async def status():
+    depth = await get_sqs_q_depth()
+    current_instances = await get_current_app_instance()
+    current = len(current_instances)
     return {
         "queue_depth": depth,
         "current_instances": current
