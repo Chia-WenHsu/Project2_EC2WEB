@@ -12,21 +12,15 @@ app = FastAPI()
 app.include_router(router)
 app.include_router(test_router)
 
-main_pid = os.getpid()
-
 @app.on_event("startup")
 async def startup_event():
     await asyncio.sleep(5)
-    print("System ready. Web API starting...")
+    print(" System ready. Web API starting...")
 
-    if os.getpid() == main_pid:
-        print(" This is the main process, launching AutoScaler...")
-        asyncio.create_task(start_autoscaler_loop())
-    else:
-        print(" Not main process, skipping AutoScaler.")
+    asyncio.create_task(start_autoscaler_loop())  
 
 async def start_autoscaler_loop():
-    print(" AutoScaler background task started.")
+    print(f" AutoScaler started in PID {os.getpid()}")
     while True:
         try:
             await scale_app_instances()
