@@ -12,16 +12,19 @@ app.include_router(router)
 app.include_router(test_router)
 
 @app.on_event("startup")
-async def start_autoscaler():
-    async def scaler_loop():
-        while True:
-            try:
-                scale_app_instances()
-            except Exception as e:
-                print(f"[AutoScaler Error] {e}")
-            await asyncio.sleep(5)   
+async def startup_event():
+    await asyncio.sleep(5) 
+    print("System ready. Web API starting...")
 
-    asyncio.create_task(scaler_loop())  
+    asyncio.create_task(start_autoscaler_loop())
+
+async def start_autoscaler_loop():
+    while True:
+        try:
+            scale_app_instances()
+        except Exception as e:
+            print(f"[AutoScaler Error] {e}")
+        await asyncio.sleep(5)  
 
 
 @app.get("/status")
