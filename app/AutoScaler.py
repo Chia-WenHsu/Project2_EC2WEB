@@ -82,7 +82,6 @@ def terminate_app_instances(count_to_terminate):
         print("沒有裝置")
 
 def scale_app_instances():
-
     global low_queue_counter
 
     queue_depth = get_sqs_q_depth()
@@ -92,19 +91,27 @@ def scale_app_instances():
 
     print(f"Queue: {queue_depth},  Running: {current_count},  Target: {desired_count}")
 
+    if queue_depth > 1:
+        desired_count = min(10, MAX_INSTANCE)
+    else:
+        desired_count = 1
+
+
     if current_count < desired_count:
         to_add = desired_count - current_count
         print(f" 建立 {to_add} instances")
         launch_app_instances(to_add)
-        low_queue_counter  = 0
+        low_queue_counter = 0  # 有擴張就重設
 
     elif current_count > desired_count:
-       if low_queue_counter >= COOLDOWN_CYCLE:
+        low_queue_counter += 1  # ✅ 關鍵：累加降載次數
+        print(f" 累積低佇列次數: {low_queue_counter}/{COOLDOWN_CYCLE}")
+        if low_queue_counter >= COOLDOWN_CYCLE:
             to_remove = current_count - desired_count
-            print(f" Terminating {to_remove} excess instances")
+            print(f"🔥 Terminating {to_remove} excess instances")
             terminate_app_instances(to_remove)
-            low_queue_counter = 0  # 關完之後重設
+            low_queue_counter = 0  # 關完再重設
 
     else:
-        print("無須擴展")
+        print(" 無須擴展")
         low_queue_counter = 0
