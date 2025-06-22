@@ -15,7 +15,7 @@ router = APIRouter()
 # 回應 queue URL
 RESPONSE_QUEUE_URL = 'https://sqs.ap-northeast-2.amazonaws.com/530751794867/project2-response-q'
 
-async def wait_for_result_async(request_id: str, timeout_seconds=120) -> str | None:
+async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | None:
     session = get_session()
     async with session.create_client('sqs', region_name='ap-northeast-2') as client:
         start = time.time()
