@@ -7,6 +7,8 @@ from app.AutoScaler import get_current_app_instance
 import asyncio
 import os
 
+asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+
 app = FastAPI()  
 
 app.include_router(router)
@@ -25,8 +27,11 @@ async def start_autoscaler_loop():
         try:
             await scale_app_instances()
         except Exception as e:
+            import traceback
             print(f"[AutoScaler Error] {e}")
+            traceback.print_exc()
         await asyncio.sleep(5)
+
 
 async def status():
     depth = await get_sqs_q_depth()
