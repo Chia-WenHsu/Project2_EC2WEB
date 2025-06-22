@@ -20,7 +20,10 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
     session = get_session()
     async with session.create_client('sqs', region_name='ap-northeast-2') as client:
         start = time.time()
+        attempt = 0
         while time.time() - start < timeout_seconds:
+            attempt += 1
+            print(f"[{request_id}] polling attempt {attempt}")
             response = await client.receive_message(
                 QueueUrl=RESPONSE_QUEUE_URL,
                 MaxNumberOfMessages=10,
@@ -28,33 +31,34 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
             )
 
             messages = response.get("Messages", [])
-            for message in messages:
-                body = message["Body"]
+            print(f"[{request_id}] received {len(messages)} messages")
 
-                # 拆成三段：request_id, 原始檔名, 預測結果
+            for message in messages:
+                body = message.get("Body", "")
                 parts = body.split(",")
                 if len(parts) != 3:
-                    print(f"Skip (invalid format): {body}")
+                    print(f"[{request_id}] Skip invalid format: {body}")
                     continue
-                
-                print(f" request_id: {request_id}")
 
                 msg_request_id, _, result = parts
+                print(f"[{request_id}] Got msg_request_id={msg_request_id}")
 
-                print(f" msg_request_id: {msg_request_id}")
-
-                # 僅處理符合此 request 的訊息
                 if msg_request_id != request_id:
-                    print(f" Skip (not match): msg_request_id={msg_request_id}, expected={request_id}")
+                    print(f"[{request_id}] Not match → skip (do not delete)")
                     continue
 
+                # 匹配成功 → 刪除並回傳結果
                 await client.delete_message(
                     QueueUrl=RESPONSE_QUEUE_URL,
                     ReceiptHandle=message["ReceiptHandle"]
                 )
-
+                print(f"[{request_id}] Matched. Returning result.")
                 return result
-    return None
+
+            await asyncio.sleep(0.1)  # 防止 CPU 過載
+
+        print(f"[{request_id}] Timeout after {timeout_seconds}s")
+        return None
 
 @router.post("/predict")
 async def predict(image: UploadFile = File(..., alias="myfile")):
