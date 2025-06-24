@@ -40,8 +40,8 @@ async def wait_for_result_async(request_id: str, timeout_seconds=60) -> str | No
             print(f"[{request_id}] polling attempt {attempt}")
             response = await client.receive_message(
                 QueueUrl=RESPONSE_QUEUE_URL,
-                MaxNumberOfMessages=5,
-                WaitTimeSeconds=5
+                MaxNumberOfMessages=1,
+                WaitTimeSeconds=3
             )
 
             messages = response.get("Messages", [])

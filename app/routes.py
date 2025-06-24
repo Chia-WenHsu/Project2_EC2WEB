@@ -28,6 +28,8 @@ async def predict(image: UploadFile = File(..., alias="myfile")):
         await upload_img_to_s3(file_bytes, s3_key)
         await send_request_to_q(request_id, s3_key)
 
+        await asyncio.sleep(3)
+
         result = await wait_for_result_async(request_id)
 
         if result:
