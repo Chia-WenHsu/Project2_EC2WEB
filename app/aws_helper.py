@@ -2,7 +2,7 @@ import json
 from aiobotocore.session import get_session
 import time
 import asyncio
-from globalResponseCache import response_cache, response_cache_lock
+from .globalResponseCache import response_cache, response_cache_lock
 import boto3
 import threading
 
