@@ -18,11 +18,11 @@ async def status():
     current_instances = await get_current_app_instance()
     current = len(current_instances)
     return {
-        "queue_depth": depth,
-        "current_instances": current
+        "請求SQS的數量": depth,
+        "目前正在跑得EC2數量": current
     }
 
-
+## 背景排程，抓取回應SQS
 @app.on_event("startup")
 def startup_event():
     start_background_response_poller()

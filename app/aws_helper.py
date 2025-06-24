@@ -31,7 +31,7 @@ async def send_request_to_q(request_id: str, s3_key: str):
             MessageBody=message
         )
 
-        
+## 決定不用這個，因為太耗時間了      
 async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | None:
     
     async with _session.create_client('sqs', region_name='ap-northeast-2') as client:
@@ -84,7 +84,6 @@ async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | N
 
 def poll_response_queue_background():
     sqs = boto3.client("sqs", region_name="ap-northeast-2")
-    print("[SQS Poller] Background polling started...")
 
     while True:
         try:
