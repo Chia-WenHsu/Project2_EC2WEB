@@ -4,7 +4,7 @@ from app.test_route import test_router
 from app.AutoScaler import scale_app_instances
 from app.AutoScaler import get_sqs_q_depth
 from app.AutoScaler import get_current_app_instance
-from aws_helper import start_background_response_poller
+from app.aws_helper import start_background_response_poller
 
 app = FastAPI()  
 
