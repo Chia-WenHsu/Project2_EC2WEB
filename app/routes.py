@@ -11,6 +11,7 @@ import time
 import os
 import traceback  
 import asyncio
+from global_response_cache import response_cache, response_cache_lock
 
 router = APIRouter()
 
@@ -28,14 +29,17 @@ async def predict(image: UploadFile = File(..., alias="myfile")):
         await upload_img_to_s3(file_bytes, s3_key)
         await send_request_to_q(request_id, s3_key)
 
-        await asyncio.sleep(3)
+        for _ in range(120):
+            with response_cache_lock:
+                if request_id in response_cache:
+                    result = response_cache.pop(request_id)
+                    return PlainTextResponse(f"{s3_key} uploaded!\nClassification result: {result}")
+            await asyncio.sleep(1)  
 
-        result = await wait_for_result_async(request_id)
+        ##result = await wait_for_result_async(request_id)
 
-        if result:
-            return PlainTextResponse(f"{s3_key} uploaded!\nClassification result: {result}")
-        else:
-            return PlainTextResponse(f"{s3_key} uploaded!\nClassification result: TIMEOUT")
+        return PlainTextResponse(f"{s3_key} uploaded!\nClassification result: TIMEOUT")
+    
     except Exception as e:
         traceback.print_exc()  
         return PlainTextResponse(f"Error during processing: {str(e)}", status_code=500)

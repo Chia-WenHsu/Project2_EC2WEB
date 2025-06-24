@@ -2,7 +2,9 @@ import json
 from aiobotocore.session import get_session
 import time
 import asyncio
-
+from global_response_cache import response_cache, response_cache_lock
+import boto3
+import threading
 
 INPUT_BUCKET = "nicoproject2input"
 REQUEST_QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/530751794867/project2-request-q"
@@ -30,7 +32,7 @@ async def send_request_to_q(request_id: str, s3_key: str):
         )
 
         
-async def wait_for_result_async(request_id: str, timeout_seconds=60) -> str | None:
+async def wait_for_result_async(request_id: str, timeout_seconds=480) -> str | None:
     
     async with _session.create_client('sqs', region_name='ap-northeast-2') as client:
         start = time.time()
@@ -41,7 +43,7 @@ async def wait_for_result_async(request_id: str, timeout_seconds=60) -> str | No
             response = await client.receive_message(
                 QueueUrl=RESPONSE_QUEUE_URL,
                 MaxNumberOfMessages=1,
-                WaitTimeSeconds=3
+                WaitTimeSeconds=5
             )
 
             messages = response.get("Messages", [])
@@ -62,7 +64,7 @@ async def wait_for_result_async(request_id: str, timeout_seconds=60) -> str | No
                     await client.change_message_visibility(
                         QueueUrl=RESPONSE_QUEUE_URL,
                         ReceiptHandle=message["ReceiptHandle"],
-                        VisibilityTimeout=5
+                        VisibilityTimeout=7
                     )
                     continue
 
@@ -78,3 +80,43 @@ async def wait_for_result_async(request_id: str, timeout_seconds=60) -> str | No
 
         print(f"[{request_id}] Timeout after {timeout_seconds}s")
         return None
+
+
+def poll_response_queue_background():
+    sqs = boto3.client("sqs", region_name="ap-northeast-2")
+    print("[SQS Poller] Background polling started...")
+
+    while True:
+        try:
+            response = sqs.receive_message(
+                QueueUrl=RESPONSE_QUEUE_URL,
+                MaxNumberOfMessages=10,
+                WaitTimeSeconds=5
+            )
+
+            messages = response.get("Messages", [])
+            for msg in messages:
+                body = msg.get("Body", "")
+                parts = body.split(",")
+                if len(parts) != 3:
+                    continue
+
+                request_id, _, result = parts
+
+                with response_cache_lock:
+                    response_cache[request_id] = result
+                    print(f"[SQS Poller] Cached result for {request_id}")
+
+                sqs.delete_message(
+                    QueueUrl=RESPONSE_QUEUE_URL,
+                    ReceiptHandle=msg["ReceiptHandle"]
+                )
+
+        except Exception as e:
+            print(f"[SQS Poller] Error: {e}")
+            time.sleep(5)  
+
+
+def start_background_response_poller():
+    thread = threading.Thread(target=poll_response_queue_background, daemon=True)
+    thread.start()
