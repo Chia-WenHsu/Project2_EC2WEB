@@ -21,7 +21,7 @@ router = APIRouter()
 async def predict(image: UploadFile = File(..., alias="myfile")):
     filename_wo_ext = os.path.splitext(image.filename)[0]
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    s3_key = f"{filename_wo_ext}_{timestamp}.jpeg"
+    s3_key = f"{filename_wo_ext}.jpeg"
     request_id = f"{filename_wo_ext}_{timestamp}"
 
     try:
