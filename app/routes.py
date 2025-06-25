@@ -29,12 +29,14 @@ async def predict(image: UploadFile = File(..., alias="myfile")):
         await upload_img_to_s3(file_bytes, s3_key)
         await send_request_to_q(request_id, s3_key)
 
+        asyncio.sleep(2)
+
         for _ in range(120):
             with response_cache_lock:
                 if request_id in response_cache:
                     result = response_cache.pop(request_id)
                     return PlainTextResponse(f"{s3_key} uploaded!\nClassification result: {result}")
-            await asyncio.sleep(1)  
+            await asyncio.sleep(2)  
 
         ##result = await wait_for_result_async(request_id)
 
