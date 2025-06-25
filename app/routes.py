@@ -18,14 +18,14 @@ router = APIRouter()
 
 
 @router.post("/predict")
-async def predict(image: UploadFile = File(..., alias="myfile")):
-    filename_wo_ext = os.path.splitext(image.filename)[0]
+async def predict(myfile: UploadFile = File(..., alias="myfile")):
+    filename_wo_ext = os.path.splitext(myfile.filename)[0]
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     s3_key = f"{filename_wo_ext}.jpeg"
     request_id = f"{filename_wo_ext}"
 
     try:
-        file_bytes = await image.read()  
+        file_bytes = await myfile.read()  
         await upload_img_to_s3(file_bytes, s3_key)
         await send_request_to_q(request_id, s3_key)
 
