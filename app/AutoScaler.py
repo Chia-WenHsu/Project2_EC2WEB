@@ -3,7 +3,7 @@ import asyncio
 
 REGION = "ap-northeast-2"
 MAX_INSTANCE = 11
-AMI_ID = "ami-0ec61cd37ec14eb06"
+AMI_ID = "ami-032c83cbf8bf0bfb3"
 INSTANCE_TYPE = "t2.micro"
 KEY_NAME = "nico_projectKey"
 SECURITY_GROUP_IDS = ["sg-06130228d6c599dd4"]
